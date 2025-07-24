@@ -64,7 +64,7 @@ jobs:
       run: |
         git config --global user.email "ci@github.com"
         git config --global user.name "GitHub Actions"
-        git remote set-url origin https://Jyo-Patil:${{ secrets.TOKEN }}@github.com/${{ github.repository }}.git
+        git remote set-url origin https://Jyo-Patil:${{ secrets.TOKEN }}@github.com/Jyo-Patil/${{ github.repository }}.git
         git add helm/netflix-clone/values.yaml
         git commit -m "CI: Update image tag to $IMAGE_TAG" || echo "No changes to commit"
         git push
