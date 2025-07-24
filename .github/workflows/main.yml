@@ -7,12 +7,10 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # env:
-    #   ECR_REGISTRY: <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com
-    #   ECR_REPOSITORY: netflix-clone
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
@@ -24,7 +22,7 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-          terraform_version: latest
+        terraform_version: latest
 
     - name: Terraform Init
       working-directory: terraform
@@ -39,13 +37,10 @@ jobs:
       working-directory: terraform
       run: terraform apply -auto-approve
 
-    - name: Checkout code
-      uses: actions/checkout@v3  
-  
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build, tag, and push image
+    - name: Build, tag, and push Docker image to ECR
       env:
         ECR_REGISTRY: 929897439921.dkr.ecr.us-east-1.amazonaws.com
         ECR_REPOSITORY: netflix-clone
@@ -56,12 +51,15 @@ jobs:
         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-
     - name: Update kubeconfig for EKS
       run: |
         aws eks update-kubeconfig --name netflix-cluster --region us-east-1
 
-    - name: Ensure ArgoCD is installed
+    - name: Create ArgoCD namespace if not exists
+      run: |
+        kubectl get ns argocd || kubectl create ns argocd
+
+    - name: Install ArgoCD
       run: |
         kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
         echo "Waiting for ArgoCD to be ready..."
@@ -86,4 +84,3 @@ jobs:
     - name: Sync ArgoCD Application
       run: |
         argocd app sync netflix-clone --grpc-web
-
