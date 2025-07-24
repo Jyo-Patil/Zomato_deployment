@@ -2,10 +2,16 @@ resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
+  tags = {
+    Name = "eks-vpc"
+  }
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "eks-igw"
+  }
 }
 
 data "aws_availability_zones" "available" {}
@@ -16,6 +22,12 @@ resource "aws_subnet" "public" {
   cidr_block              = cidrsubnet("10.0.1.0/24", 4, count.index)
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
+
+  tags = {
+    Name                                      = "eks-public-subnet-${count.index}"
+    "kubernetes.io/cluster/netflix-cluster"   = "shared"
+    "kubernetes.io/role/elb"                  = "1"
+  }
 }
 
 resource "aws_route_table" "public" {
@@ -24,10 +36,38 @@ resource "aws_route_table" "public" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
+
+  tags = {
+    Name = "eks-public-rt"
+  }
 }
 
 resource "aws_route_table_association" "public" {
   count          = 2
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
+}
+
+resource "aws_security_group" "eks_node_sg" {
+  name        = "eks-node-sg"
+  description = "Allow all internal traffic for EKS"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self        = true
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "EKS Node SG"
+  }
 }
