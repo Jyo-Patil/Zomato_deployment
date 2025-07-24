@@ -69,10 +69,14 @@ jobs:
     #     git commit -m "CI: Update image tag to $IMAGE_TAG" || echo "No changes to commit"
     #     git push
 
-    - name: deploy 
+    - name: Kubeconfig 
       run:
         aws eks update-kubeconfig --name netflix-cluster --region us-east-1
-        kubectl apply -f argocd/netflix-clone.yaml -n argocd
+
+    - name: deploy using helm
+      run: 
+        kubectl apply -f argocd/netflix-clone.yaml -n argocd     
+    
 
     - name: Install ArgoCD CLI
       run: |
