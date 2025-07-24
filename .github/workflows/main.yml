@@ -37,7 +37,7 @@ jobs:
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main'
       working-directory: terraform
-      run: terraform destroy -auto-approve
+      run: terraform apply -auto-approve
 
     - name: Checkout code
       uses: actions/checkout@v3  
@@ -69,18 +69,19 @@ jobs:
     #     git commit -m "CI: Update image tag to $IMAGE_TAG" || echo "No changes to commit"
     #     git push
 
-    # - name: deploy 
-    #         aws eks update-kubeconfig --name practice-cluster --region us-east-1
+    - name: deploy 
+            aws eks update-kubeconfig --name netflix-cluster --region us-east-1
+            kubectl apply -f argocd/netflix-clone.yaml -n argocd
 
-    #   - name: Install ArgoCD CLI
-    #     run: |
-    #       curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-    #       chmod +x /usr/local/bin/argocd
+    - name: Install ArgoCD CLI
+      run: |
+          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
 
-    #   - name: Login to ArgoCD
-    #     run: |
-    #       argocd login 52.91.70.212:30335 --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+    - name: Login to ArgoCD
+      run: |
+          argocd login 52.91.70.212:30335 --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
 
-    #   - name: Sync ArgoCD Application
-    #     run: |
-    #       argocd app sync  --grpc-web
+    - name: Sync ArgoCD Application
+      run: |
+          argocd app sync  --grpc-web
