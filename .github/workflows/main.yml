@@ -56,15 +56,15 @@ jobs:
         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    - name: Update Helm values.yaml with new image tag
-      run: |
-        sed -i "s|tag: .*|tag: $IMAGE_TAG|" helm/netflix-clone/values.yaml
+    # - name: Update Helm values.yaml with new image tag
+    #   run: |
+    #     sed -i "s|tag: .*|tag: $IMAGE_TAG|" helm/netflix-clone/values.yaml
 
-    - name: Commit and push updated Helm chart
-      run: |
-        git config --global user.email "ci@github.com"
-        git config --global user.name "GitHub Actions"
-        git remote set-url origin https://Jyo-Patil:${{ secrets.TOKEN }}@github.com/${{ github.repository }}.git
-        git add helm/netflix-clone/values.yaml
-        git commit -m "CI: Update image tag to $IMAGE_TAG" || echo "No changes to commit"
-        git push
+    # - name: Commit and push updated Helm chart
+    #   run: |
+    #     git config --global user.email "ci@github.com"
+    #     git config --global user.name "GitHub Actions"
+    #     git remote set-url origin https://Jyo-Patil:${{ secrets.TOKEN }}@github.com/${{ github.repository }}.git
+    #     git add helm/netflix-clone/values.yaml
+    #     git commit -m "CI: Update image tag to $IMAGE_TAG" || echo "No changes to commit"
+    #     git push
