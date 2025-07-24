@@ -56,37 +56,34 @@ jobs:
         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    # - name: Update Helm values.yaml with new image tag
-    #   run: |
-    #     sed -i "s|tag: .*|tag: $IMAGE_TAG|" helm/netflix-clone/values.yaml
 
-    # - name: Commit and push updated Helm chart
-    #   run: |
-    #     git config --global user.email "ci@github.com"
-    #     git config --global user.name "GitHub Actions"
-    #     git remote set-url origin https://Jyo-Patil:${{ secrets.TOKEN }}@github.com/${{ github.repository }}.git
-    #     git add helm/netflix-clone/values.yaml
-    #     git commit -m "CI: Update image tag to $IMAGE_TAG" || echo "No changes to commit"
-    #     git push
-
-    - name: Kubeconfig 
-      run:
+    - name: Update kubeconfig for EKS
+      run: |
         aws eks update-kubeconfig --name netflix-cluster --region us-east-1
 
-    - name: deploy using helm
-      run: 
-        kubectl apply -f argocd/netflix-clone-app.yaml -n argocd     
-    
+    - name: Ensure ArgoCD is installed
+      run: |
+        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+        echo "Waiting for ArgoCD to be ready..."
+        kubectl rollout status deployment argocd-server -n argocd --timeout=180s
+
+    - name: Deploy ArgoCD Application resource
+      run: |
+        kubectl apply -f argocd/netflix-clone-app.yaml -n argocd
 
     - name: Install ArgoCD CLI
       run: |
-          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x /usr/local/bin/argocd
+        curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        chmod +x /usr/local/bin/argocd
 
     - name: Login to ArgoCD
       run: |
-          argocd login 52.91.70.212:30335 --username admin --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+        argocd login 52.91.70.212:30335 \
+          --username admin \
+          --password ${{ secrets.ARGOCD_PASSWORD }} \
+          --insecure
 
     - name: Sync ArgoCD Application
       run: |
-          argocd app sync  --grpc-web
+        argocd app sync netflix-clone --grpc-web
+
