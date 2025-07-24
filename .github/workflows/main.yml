@@ -75,7 +75,7 @@ jobs:
 
     - name: deploy using helm
       run: 
-        kubectl apply -f argocd/netflix-clone.yaml -n argocd     
+        kubectl apply -f argocd/netflix-clone-app.yaml -n argocd     
     
 
     - name: Install ArgoCD CLI
