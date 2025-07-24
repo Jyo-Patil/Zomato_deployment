@@ -55,15 +55,12 @@ jobs:
       run: |
         aws eks update-kubeconfig --name netflix-cluster --region us-east-1
 
-    - name: Create ArgoCD namespace if not exists
-      run: |
-        kubectl get ns argocd || kubectl create ns argocd
-
-    - name: Install ArgoCD
+    - name: Ensure ArgoCD is installed
       run: |
         kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-        echo "Waiting for ArgoCD to be ready..."
-        kubectl rollout status deployment argocd-server -n argocd --timeout=180s
+        echo "Waiting for ArgoCD server deployment to be ready..."
+        sleep 30
+        kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
 
     - name: Deploy ArgoCD Application resource
       run: |
