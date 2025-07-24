@@ -39,7 +39,9 @@ jobs:
       working-directory: terraform
       run: terraform apply -auto-approve
 
-
+    - name: Checkout code
+      uses: actions/checkout@v3  
+  
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
@@ -49,6 +51,7 @@ jobs:
         ECR_REPOSITORY: netflix-clone
         IMAGE_TAG: latest
       run: |
+        cd app_code
         docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
