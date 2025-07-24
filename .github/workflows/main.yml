@@ -70,8 +70,9 @@ jobs:
     #     git push
 
     - name: deploy 
-            aws eks update-kubeconfig --name netflix-cluster --region us-east-1
-            kubectl apply -f argocd/netflix-clone.yaml -n argocd
+      run:
+        aws eks update-kubeconfig --name netflix-cluster --region us-east-1
+        kubectl apply -f argocd/netflix-clone.yaml -n argocd
 
     - name: Install ArgoCD CLI
       run: |
