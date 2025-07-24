@@ -35,7 +35,7 @@ jobs:
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main'
       working-directory: terraform
-      run: terraform apply -auto-approve
+      run: terraform destroy -auto-approve
 
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
@@ -51,33 +51,33 @@ jobs:
         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    - name: Update kubeconfig for EKS
-      run: |
-        aws eks update-kubeconfig --name netflix-cluster --region us-east-1
+    # - name: Update kubeconfig for EKS
+    #   run: |
+    #     aws eks update-kubeconfig --name netflix-cluster --region us-east-1
 
-    - name: Ensure ArgoCD is installed
-      run: |
-        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-        echo "Waiting for ArgoCD server deployment to be ready..."
-        sleep 30
-        kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
+    # - name: Ensure ArgoCD is installed
+    #   run: |
+    #     kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    #     echo "Waiting for ArgoCD server deployment to be ready..."
+    #     sleep 30
+    #     kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
 
-    - name: Deploy ArgoCD Application resource
-      run: |
-        kubectl apply -f argocd/netflix-clone-app.yaml -n argocd
+    # - name: Deploy ArgoCD Application resource
+    #   run: |
+    #     kubectl apply -f argocd/netflix-clone-app.yaml -n argocd
 
-    - name: Install ArgoCD CLI
-      run: |
-        curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-        chmod +x /usr/local/bin/argocd
+    # - name: Install ArgoCD CLI
+    #   run: |
+    #     curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+    #     chmod +x /usr/local/bin/argocd
 
-    - name: Login to ArgoCD
-      run: |
-        argocd login 52.91.70.212:30335 \
-          --username admin \
-          --password ${{ secrets.ARGOCD_PASSWORD }} \
-          --insecure
+    # - name: Login to ArgoCD
+    #   run: |
+    #     argocd login 52.91.70.212:30335 \
+    #       --username admin \
+    #       --password ${{ secrets.ARGOCD_PASSWORD }} \
+    #       --insecure
 
-    - name: Sync ArgoCD Application
-      run: |
-        argocd app sync netflix-clone --grpc-web
+    # - name: Sync ArgoCD Application
+    #   run: |
+    #     argocd app sync netflix-clone --grpc-web
