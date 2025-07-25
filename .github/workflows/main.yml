@@ -59,6 +59,11 @@ jobs:
       run: |
         kubectl get ns argocd || kubectl create ns argocd
 
+    - name: Install ArgoCD and CRDs
+      run: |
+        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+        kubectl rollout status deployment/argocd-server -n argocd --timeout=180s    
+
     - name: Install ArgoCD CLI
       run: |
         curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
