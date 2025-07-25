@@ -40,21 +40,26 @@ jobs:
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build, tag, and push Docker image to ECR
-      env:
-        ECR_REGISTRY: 929897439921.dkr.ecr.us-east-1.amazonaws.com
-        ECR_REPOSITORY: netflix-clone
-        IMAGE_TAG: latest
-      run: |
-        cd app_code
-        docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-        docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    # - name: Build, tag, and push Docker image to ECR
+    #   env:
+    #     ECR_REGISTRY: 929897439921.dkr.ecr.us-east-1.amazonaws.com
+    #     ECR_REPOSITORY: netflix-clone
+    #     IMAGE_TAG: latest
+    #   run: |
+    #     cd app_code
+    #     docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+    #     docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     - name: Update kubeconfig for EKS
       run: |
         aws eks update-kubeconfig --name netflix-cluster --region us-east-1
 
+    - name: List contents of helm/netflix-clone
+      run: |
+        echo "Current working directory: $(pwd)"
+        ls -la helm/netflix-clone
+ 
     - name: deploy it to eks
       run:
        helm upgrade --install netflix-clone helm/netflix-clone
