@@ -2,6 +2,7 @@ resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
+
   tags = {
     Name = "eks-vpc"
   }
@@ -9,6 +10,7 @@ resource "aws_vpc" "main" {
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
+
   tags = {
     Name = "eks-igw"
   }
@@ -19,7 +21,7 @@ data "aws_availability_zones" "available" {}
 resource "aws_subnet" "public" {
   count                   = 2
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = cidrsubnet("10.0.1.0/24", 4, count.index)
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index) # /24 subnets
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
 
@@ -32,6 +34,7 @@ resource "aws_subnet" "public" {
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
@@ -60,6 +63,15 @@ resource "aws_security_group" "eks_node_sg" {
     self        = true
   }
 
+  # Optional: open HTTP for testing NodePort directly (e.g. port 31064)
+  ingress {
+    description = "Allow HTTP for NodePort access"
+    from_port   = 30000
+    to_port     = 32767
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -70,4 +82,4 @@ resource "aws_security_group" "eks_node_sg" {
   tags = {
     Name = "EKS Node SG"
   }
-} 
+}
