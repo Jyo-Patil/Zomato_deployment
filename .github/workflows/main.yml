@@ -65,7 +65,7 @@ jobs:
        helm upgrade --install netflix-clone helm/netflix-clone
  
     - name: get svc
-      run: 
+      run: |
         kubectl get svc netflix-clone -n default
         kubectl describe svc netflix-clone -n default    
 
