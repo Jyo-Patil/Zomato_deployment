@@ -1,3 +1,6 @@
+############################################
+# IAM Role for EKS Cluster
+############################################
 resource "aws_iam_role" "eks_cluster_role" {
   name = "eks-cluster-role"
 
@@ -18,6 +21,9 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
+############################################
+# EKS Cluster Resource
+############################################
 resource "aws_eks_cluster" "eks" {
   name     = "netflix-cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn
@@ -34,20 +40,21 @@ resource "aws_eks_cluster" "eks" {
   ]
 }
 
+############################################
+# IAM Role for Node Group
+############################################
 resource "aws_iam_role" "node_group_role" {
   name = "eks-node-group-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
+    Statement = [{
+      Effect = "Allow",
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      },
+      Action = "sts:AssumeRole"
+    }]
   })
 
   tags = {
@@ -55,6 +62,9 @@ resource "aws_iam_role" "node_group_role" {
   }
 }
 
+############################################
+# Attach Policies to Node Group Role
+############################################
 resource "aws_iam_role_policy_attachment" "AmazonEKSWorkerNodePolicy" {
   role       = aws_iam_role.node_group_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
@@ -70,6 +80,9 @@ resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
 
+############################################
+# EKS Node Group Resource
+############################################
 resource "aws_eks_node_group" "nodes" {
   cluster_name    = aws_eks_cluster.eks.name
   node_group_name = "netflix-nodes"
