@@ -5,8 +5,7 @@ image:
 
 imagePullSecrets:
   - name: regcred
-  
+
 service:
   type: LoadBalancer
   port: 80
-
