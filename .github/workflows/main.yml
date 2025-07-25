@@ -57,9 +57,12 @@ jobs:
 
     - name: deploy it to eks
       run:
-       helm upgrade --install netflix-clone helm/netflix-clone \
-       kubectl get svc netflix-clone -n default
-       kubectl describe svc netflix-clone -n default    
+       helm upgrade --install netflix-clone helm/netflix-clone
+ 
+    - name: get svc
+      run: 
+        kubectl get svc netflix-clone -n default
+        kubectl describe svc netflix-clone -n default    
 
     # - name: Ensure ArgoCD namespace exists
     #   run: |
