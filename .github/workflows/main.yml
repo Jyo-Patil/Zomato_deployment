@@ -35,7 +35,7 @@ jobs:
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main'
       working-directory: terraform
-      run: terraform destroy -auto-approve
+      run: terraform apply -auto-approve
 
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
@@ -50,6 +50,47 @@ jobs:
         docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
         docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    - name: Update kubeconfig for EKS
+      run: |
+        aws eks update-kubeconfig --name netflix-cluster --region us-east-1
+
+    - name: Install ArgoCD CLI
+      run: |
+        curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        chmod +x /usr/local/bin/argocd
+
+    - name: Login to ArgoCD CLI
+      run: |
+        argocd login ${{ secrets.ARGOCD_SERVER_IP }} \
+          --username admin \
+          --password ${{ secrets.ARGOCD_PASSWORD }} \
+          --insecure
+
+    - name: Create SSH repo secret in ArgoCD
+      run: |
+        echo "${{ secrets.ARGOCD_SSH_PRIVATE_KEY }}" > id_rsa
+        kubectl create secret generic github-ssh-creds \
+          --namespace argocd \
+          --from-literal=url=git@github.com:Jyo-Patil/Zomato_deployment.git \
+          --from-file=sshPrivateKey=id_rsa \
+          --type Opaque \
+          --dry-run=client -o yaml | \
+        kubectl label --local -f - \
+          argocd.argoproj.io/secret-type=repository -o yaml | \
+        kubectl apply -f -
+        rm id_rsa
+
+    - name: Apply ArgoCD Application
+      run: |
+        kubectl apply -f argocd/netflix-clone-app.yaml -n argocd
+
+    - name: Sync ArgoCD Application
+      run: |
+        argocd app sync netflix-clone --grpc-web
+
+
+
 
     # - name: Update kubeconfig for EKS
     #   run: |
