@@ -6,9 +6,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/Jyo-Patil/Zomato_deployment
-    targetRevision: HEAD
-    path: helm/netflix-clone
+    repoURL: https://github.com/<your-username>/<your-repo-name>.git
+    targetRevision: main
+    path: helm/netflix-clone  # path to the Helm chart in your repo
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: default
@@ -16,3 +19,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
