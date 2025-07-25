@@ -59,10 +59,21 @@ jobs:
       run: |
         kubectl get ns argocd || kubectl create ns argocd
 
-    - name: Install ArgoCD and CRDs
+    - name: Wait for ArgoCD server pod to be ready
       run: |
-        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-        kubectl rollout status deployment/argocd-server -n argocd --timeout=180s    
+        echo "Waiting for ArgoCD server pod to be ready..."
+        for i in {1..10}; do
+          STATUS=$(kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server -o jsonpath='{.items[0].status.phase}')
+          READY=$(kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server -o jsonpath='{.items[0].status.containerStatuses[0].ready}')
+          echo "Status: $STATUS, Ready: $READY"
+          if [ "$STATUS" = "Running" ] && [ "$READY" = "true" ]; then
+            echo "ArgoCD server is ready."
+            break
+          fi
+          echo "Waiting 15 seconds..."
+          sleep 15
+        done
+    
 
     - name: Install ArgoCD CLI
       run: |
