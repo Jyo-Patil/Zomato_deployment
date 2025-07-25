@@ -86,10 +86,6 @@ jobs:
           --username admin \
           --password ${{ secrets.ARGOCD_PASSWORD }} \
           --insecure
-        TOKEN=$(argocd account generate-token)
-        echo "::add-mask::$TOKEN"
-        echo "ARGOCD_TOKEN=$TOKEN" >> $GITHUB_ENV
-  
 
     - name: Create SSH repo secret in ArgoCD
       run: |
@@ -109,11 +105,14 @@ jobs:
       run: |
         kubectl apply -f argocd/netflix-clone-app.yaml -n argocd
 
-    - name: Sync ArgoCD Application using Token
+    - name: Sync ArgoCD Application (with fresh login)
       run: |
-         argocd app sync netflix-clone \
-         --grpc-web \
-         --auth-token ${{ env.ARGOCD_TOKEN }}
+        argocd login ${{ secrets.ARGOCD_SERVER_IP }} \
+          --username admin \
+          --password ${{ secrets.ARGOCD_PASSWORD }} \
+          --insecure
+
+        argocd app sync netflix-clone --grpc-web
 
 
 
