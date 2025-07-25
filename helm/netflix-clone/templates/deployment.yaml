@@ -11,9 +11,11 @@ spec:
     metadata:
       labels:
         app: netflix-clone
-  spec:
-    imagePullSecrets:
-    - name: {{ .Values.imagePullSecrets.name }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
         - name: netflix
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
