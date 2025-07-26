@@ -60,14 +60,15 @@ jobs:
       run: |
         aws eks update-kubeconfig --name netflix-cluster --region us-east-1
 
-    # - name: Create Kubernetes image pull secret
-    #   run: |
-    #     kubectl delete secret regcred --ignore-not-found
-    #     aws ecr get-login-password --region us-east-1 | \
-    #     kubectl create secret docker-registry regcred \
-    #       --docker-server=929897439921.dkr.ecr.us-east-1.amazonaws.com \
-    #       --docker-username=AWS \
-    #       --docker-password=$(aws ecr get-login-password --region us-east-1)    
+    - name: Create Kubernetes image pull secret
+      run: |
+         kubectl delete secret regcred --ignore-not-found --namespace default
+         aws ecr get-login-password --region us-east-1 | \
+         kubectl create secret docker-registry regcred \
+          --docker-server=929897439921.dkr.ecr.us-east-1.amazonaws.com \
+          --docker-username=AWS \
+          --docker-password=$(aws ecr get-login-password --region us-east-1) \
+          --namespace default
 
     - name: List contents of helm/netflix-clone
       run: |
