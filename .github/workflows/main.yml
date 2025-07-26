@@ -72,6 +72,12 @@ jobs:
       run: |
         echo "Current working directory: $(pwd)"
         ls -la helm/netflix-clone
+
+    - name: Login Docker to AWS ECR Private Registry
+      run: |
+        aws ecr get-login-password --region us-east-1 | \
+        docker login --username AWS \
+        --password-stdin 929897439921.dkr.ecr.us-east-1.amazonaws.com    
  
     # - name: deploy it to eks
     #   run:
