@@ -42,7 +42,7 @@ jobs:
 
     - name: Build, tag, and push Docker image to ECR
       env:
-        ECR_REGISTRY: 929897439921.dkr.ecr.us-east-1.amazonaws.com
+        ECR_REGISTRY: public.ecr.aws/x5p1t2r7/netflix-clone
         ECR_REPOSITORY: netflix-clone
         IMAGE_TAG: latest
       run: |
