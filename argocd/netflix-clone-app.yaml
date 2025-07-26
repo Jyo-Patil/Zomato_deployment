@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: netflix-clone
+  name: zomato-clone
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/<your-username>/<your-repo-name>.git
     targetRevision: main
-    path: helm/netflix-clone  # path to the Helm chart in your repo
+    path: helm/zomato-clone  # path to the Helm chart in your repo
     helm:
       valueFiles:
         - values.yaml
