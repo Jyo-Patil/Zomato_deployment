@@ -1,10 +1,10 @@
 image:
   repository: 929897439921.dkr.ecr.us-east-1.amazonaws.com/netflix-clone
   tag: latest
-  pullPolicy: IfNotPresent
+#   pullPolicy: IfNotPresent
 
-imagePullSecrets:
-  - name: regcred
+# imagePullSecrets:
+#   - name: regcred
 
 service:
   type: LoadBalancer
