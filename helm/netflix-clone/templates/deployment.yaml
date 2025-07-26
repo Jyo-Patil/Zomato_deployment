@@ -12,7 +12,6 @@ spec:
       labels:
         app: netflix-clone
     spec:
-      serviceAccountName: ecr-service-account
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

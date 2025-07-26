@@ -58,15 +58,15 @@ jobs:
       run: |
         aws eks update-kubeconfig --name netflix-cluster --region us-east-1
 
-    - name: Create Kubernetes image pull secret
-      run: |
-         kubectl delete secret regcred --ignore-not-found --namespace default
-         aws ecr get-login-password --region us-east-1 | \
-         kubectl create secret docker-registry regcred \
-          --docker-server=929897439921.dkr.ecr.us-east-1.amazonaws.com \
-          --docker-username=AWS \
-          --docker-password=$(aws ecr get-login-password --region us-east-1) \
-          --namespace default
+    # - name: Create Kubernetes image pull secret
+    #   run: |
+    #      kubectl delete secret regcred --ignore-not-found --namespace default
+    #      aws ecr get-login-password --region us-east-1 | \
+    #      kubectl create secret docker-registry regcred \
+    #       --docker-server=929897439921.dkr.ecr.us-east-1.amazonaws.com \
+    #       --docker-username=AWS \
+    #       --docker-password=$(aws ecr get-login-password --region us-east-1) \
+    #       --namespace default
 
     - name: List contents of helm/netflix-clone
       run: |
@@ -86,7 +86,7 @@ jobs:
     # - name: get svc
     #   run: |
     #     kubectl get svc netflix-clone -n default
-    #     kubectl describe svc netflix-clone -n default    
+    #     kubectl describe svc netflix-clone -n default 
 
     - name: Install ArgoCD CLI
       run: |
@@ -96,10 +96,15 @@ jobs:
 
     - name: Login to ArgoCD
       run: |
-        argocd login ${{ secrets.ARGOCD_SERVER_IP}} \
+        argocd login ${{ secrets.ARGOCD_SERVER_IP }} \
           --username ${{ secrets.ARGOCD_USERNAME }} \
           --password ${{ secrets.ARGOCD_PASSWORD }} \
           --insecure
+
+    - name: Register EKS cluster with ArgoCD
+      run: |
+        # This adds the EKS cluster to ArgoCD, replace <eks-context-name> with your EKS context
+        argocd cluster add $(kubectl config current-context) --insecure
 
     - name: Add GitHub repo to ArgoCD
       run: |
@@ -110,18 +115,54 @@ jobs:
 
     - name: Create ArgoCD Application
       run: |
+        # Use the EKS cluster API endpoint instead of in-cluster URL
+        EKS_API=$(kubectl config view -o jsonpath='{.clusters[?(@.name=="'$(kubectl config current-context)'")].cluster.server}')
         argocd app create netflix-clone \
           --repo https://github.com/${{ github.repository }}.git \
           --path helm/netflix-clone \
-          --dest-server https://kubernetes.default.svc \
+          --dest-server $EKS_API \
           --dest-namespace default \
           --sync-policy automated \
           --insecure || echo "App already exists, continuing..."
 
     - name: Optionally trigger ArgoCD sync
       run: |
-        argocd app sync netflix-clone \
-          --insecure
+        argocd app sync netflix-clone --insecure   
+
+    # - name: Install ArgoCD CLI
+    #   run: |
+    #     curl -sSL -o /tmp/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+    #     chmod +x /tmp/argocd
+    #     sudo mv /tmp/argocd /usr/local/bin/argocd
+
+    # - name: Login to ArgoCD
+    #   run: |
+    #     argocd login ${{ secrets.ARGOCD_SERVER_IP}} \
+    #       --username ${{ secrets.ARGOCD_USERNAME }} \
+    #       --password ${{ secrets.ARGOCD_PASSWORD }} \
+    #       --insecure
+
+    # - name: Add GitHub repo to ArgoCD
+    #   run: |
+    #     argocd repo add https://github.com/${{ github.repository }}.git \
+    #       --username ${{ secrets.GIT_USERNAME }} \
+    #       --password ${{ secrets.GIT_PAT }} \
+    #       --insecure
+
+    # - name: Create ArgoCD Application
+    #   run: |
+    #     argocd app create netflix-clone \
+    #       --repo https://github.com/${{ github.repository }}.git \
+    #       --path helm/netflix-clone \
+    #       --dest-server https://kubernetes.default.svc \
+    #       --dest-namespace default \
+    #       --sync-policy automated \
+    #       --insecure || echo "App already exists, continuing..."
+
+    # - name: Optionally trigger ArgoCD sync
+    #   run: |
+    #     argocd app sync netflix-clone \
+    #       --insecure
 
     # # - name: Ensure ArgoCD namespace exists
     # #   run: |
