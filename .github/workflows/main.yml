@@ -37,13 +37,11 @@ jobs:
       working-directory: terraform
       run: terraform apply -auto-approve
 
-    - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v1
-
-    - name: Authenticate Docker to Amazon ECR Public
+    - name: Login to private Amazon ECR
       run: |
-        aws ecr-public get-login-password --region us-east-1 | \
-        docker login --username AWS --password-stdin public.ecr.aws   
+        aws ecr get-login-password --region us-east-1 | \
+        docker login --username AWS \
+        --password-stdin 929897439921.dkr.ecr.us-east-1.amazonaws.com  
 
     - name: Build, tag, and push Docker image to ECR
       env:
