@@ -75,14 +75,14 @@ jobs:
         echo "Current working directory: $(pwd)"
         ls -la helm/netflix-clone
  
-    - name: deploy it to eks
-      run:
-       helm upgrade --install netflix-clone helm/netflix-clone
+    # - name: deploy it to eks
+    #   run:
+    #    helm upgrade --install netflix-clone helm/netflix-clone
  
-    - name: get svc
-      run: |
-        kubectl get svc netflix-clone -n default
-        kubectl describe svc netflix-clone -n default    
+    # - name: get svc
+    #   run: |
+    #     kubectl get svc netflix-clone -n default
+    #     kubectl describe svc netflix-clone -n default    
 
     - name: Install ArgoCD CLI
       run: |

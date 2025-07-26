@@ -3,8 +3,6 @@ image:
   tag: latest
   pullPolicy: Always
 
-imagePullSecretName: regcred
-
 service:
   type: LoadBalancer
   port: 80
