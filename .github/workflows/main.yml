@@ -83,40 +83,40 @@ jobs:
         kubectl get svc netflix-clone -n default
         kubectl describe svc netflix-clone -n default    
 
-    # - name: Install ArgoCD CLI
-    #   run: |
-    #     curl -sSL -o /tmp/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-    #     chmod +x /tmp/argocd
-    #     sudo mv /tmp/argocd /usr/local/bin/argocd
+    - name: Install ArgoCD CLI
+      run: |
+        curl -sSL -o /tmp/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        chmod +x /tmp/argocd
+        sudo mv /tmp/argocd /usr/local/bin/argocd
 
-    # - name: Login to ArgoCD
-    #   run: |
-    #     argocd login ${{ secrets.ARGOCD_SERVER_IP}} \
-    #       --username ${{ secrets.ARGOCD_USERNAME }} \
-    #       --password ${{ secrets.ARGOCD_PASSWORD }} \
-    #       --insecure
+    - name: Login to ArgoCD
+      run: |
+        argocd login ${{ secrets.ARGOCD_SERVER_IP}} \
+          --username ${{ secrets.ARGOCD_USERNAME }} \
+          --password ${{ secrets.ARGOCD_PASSWORD }} \
+          --insecure
 
-    # - name: Add GitHub repo to ArgoCD
-    #   run: |
-    #     argocd repo add https://github.com/${{ github.repository }}.git \
-    #       --username ${{ secrets.GIT_USERNAME }} \
-    #       --password ${{ secrets.GIT_PAT }} \
-    #       --insecure
+    - name: Add GitHub repo to ArgoCD
+      run: |
+        argocd repo add https://github.com/${{ github.repository }}.git \
+          --username ${{ secrets.GIT_USERNAME }} \
+          --password ${{ secrets.GIT_PAT }} \
+          --insecure
 
-    # - name: Create ArgoCD Application
-    #   run: |
-    #     argocd app create netflix-clone \
-    #       --repo https://github.com/${{ github.repository }}.git \
-    #       --path helm/netflix-clone \
-    #       --dest-server https://kubernetes.default.svc \
-    #       --dest-namespace default \
-    #       --sync-policy automated \
-    #       --insecure || echo "App already exists, continuing..."
+    - name: Create ArgoCD Application
+      run: |
+        argocd app create netflix-clone \
+          --repo https://github.com/${{ github.repository }}.git \
+          --path helm/netflix-clone \
+          --dest-server https://kubernetes.default.svc \
+          --dest-namespace default \
+          --sync-policy automated \
+          --insecure || echo "App already exists, continuing..."
 
-    # - name: Optionally trigger ArgoCD sync
-    #   run: |
-    #     argocd app sync netflix-clone \
-    #       --insecure
+    - name: Optionally trigger ArgoCD sync
+      run: |
+        argocd app sync netflix-clone \
+          --insecure
 
     # # - name: Ensure ArgoCD namespace exists
     # #   run: |
