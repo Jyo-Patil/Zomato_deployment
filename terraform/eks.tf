@@ -25,7 +25,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSClusterPolicy" {
 # EKS Cluster Resource
 ############################################
 resource "aws_eks_cluster" "eks" {
-  name     = "netflix-cluster"
+  name     = "zomato-cluster"
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
@@ -85,7 +85,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKS_CNI_Policy" {
 ############################################
 resource "aws_eks_node_group" "nodes" {
   cluster_name    = aws_eks_cluster.eks.name
-  node_group_name = "netflix-nodes"
+  node_group_name = "zomato-nodes"
   node_role_arn   = aws_iam_role.node_group_role.arn
   subnet_ids      = aws_subnet.public[*].id
   instance_types  = ["t3.medium"]

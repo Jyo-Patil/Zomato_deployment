@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: netflix-clone
+  name: zomato-clone
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app: netflix-clone
+    app: zomato-clone
   ports:
     - port: {{ .Values.service.port }}
       targetPort: 3000

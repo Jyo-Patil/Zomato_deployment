@@ -27,7 +27,7 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name                                      = "eks-public-subnet-${count.index}"
-    "kubernetes.io/cluster/netflix-cluster"   = "shared"
+    "kubernetes.io/cluster/zomato-cluster"   = "shared"
     "kubernetes.io/role/elb"                  = "1"
   }
 }
