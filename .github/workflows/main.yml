@@ -1,8 +1,8 @@
 name: CI-CD Build & Deploy with ArgoCD
 
-on:
-  push:
-    branches: [test]
+# on:
+#   push:
+#     branches: [test]
 
 jobs:
   build-and-deploy:
