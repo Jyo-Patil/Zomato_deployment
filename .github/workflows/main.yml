@@ -107,13 +107,16 @@ jobs:
       run: |
         # Use the EKS cluster API endpoint instead of in-cluster URL
         EKS_API=$(kubectl config view -o jsonpath='{.clusters[?(@.name=="'$(kubectl config current-context)'")].cluster.server}')
+        
         argocd app create zomato-clone \
           --repo https://github.com/${{ github.repository }}.git \
+          --revision test \
           --path helm/zomato-clone \
           --dest-server $EKS_API \
           --dest-namespace default \
           --sync-policy automated \
           --insecure || echo "App already exists, continuing..."
+
 
     - name: Optionally trigger ArgoCD sync
       run: |
