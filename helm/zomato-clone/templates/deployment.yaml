@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: netflix-clone
+  name: zomato-clone
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: netflix-clone
+      app: zomato-clone
   template:
     metadata:
       labels:
-        app: netflix-clone
+        app: zomato-clone
     spec:
       containers:
       - name: {{ .Chart.Name }}
