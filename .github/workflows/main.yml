@@ -46,7 +46,7 @@ jobs:
     - name: Build, tag, and push Docker image to ECR
       env:
         ECR_REGISTRY: 929897439921.dkr.ecr.us-east-1.amazonaws.com
-        ECR_REPOSITORY: netflix-clone
+        ECR_REPOSITORY: zomato-clone
         IMAGE_TAG: latest
       run: |
         cd app_code
@@ -56,12 +56,12 @@ jobs:
 
     - name: Update kubeconfig for EKS
       run: |
-        aws eks update-kubeconfig --name netflix-cluster --region us-east-1
+        aws eks update-kubeconfig --name zomato-cluster --region us-east-1
 
-    - name: List contents of helm/netflix-clone
+    - name: List contents of helm/zomato-clone
       run: |
         echo "Current working directory: $(pwd)"
-        ls -la helm/netflix-clone
+        ls -la helm/zomato-clone
 
     - name: Login Docker to AWS ECR Private Registry
       run: |
@@ -71,12 +71,12 @@ jobs:
  
     # - name: deploy it to eks
     #   run:
-    #    helm upgrade --install netflix-clone helm/netflix-clone
+    #    helm upgrade --install zomato-clone helm/zomato-clone
  
     # - name: get svc
     #   run: |
-    #     kubectl get svc netflix-clone -n default
-    #     kubectl describe svc netflix-clone -n default 
+    #     kubectl get svc zomato-clone -n default
+    #     kubectl describe svc zomato-clone -n default 
 
     - name: Install ArgoCD CLI
       run: |
@@ -107,9 +107,9 @@ jobs:
       run: |
         # Use the EKS cluster API endpoint instead of in-cluster URL
         EKS_API=$(kubectl config view -o jsonpath='{.clusters[?(@.name=="'$(kubectl config current-context)'")].cluster.server}')
-        argocd app create netflix-clone \
+        argocd app create zomato-clone \
           --repo https://github.com/${{ github.repository }}.git \
-          --path helm/netflix-clone \
+          --path helm/zomato-clone \
           --dest-server $EKS_API \
           --dest-namespace default \
           --sync-policy automated \
@@ -117,4 +117,4 @@ jobs:
 
     - name: Optionally trigger ArgoCD sync
       run: |
-        argocd app sync netflix-clone --insecure   
+        argocd app sync zomato-clone --insecure   
