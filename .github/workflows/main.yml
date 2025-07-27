@@ -2,7 +2,7 @@ name: CI-CD Build & Deploy with ArgoCD
 
 on:
   push:
-    branches: [main]
+    branches: [test]
 
 jobs:
   build-and-deploy:
@@ -33,9 +33,9 @@ jobs:
       run: terraform plan
 
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/test'
       working-directory: terraform
-      run: terraform destroy -auto-approve
+      run: terraform apply -auto-approve
 
     - name: Login to private Amazon ECR
       run: |
